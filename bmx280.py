@@ -126,6 +126,15 @@ class BMx280:
         return value
 
     @property
+    def t_fine(self):
+        self.temperature  # Ensure the t_fine value is calculated
+        return self._t_fine
+
+    @t_fine.setter
+    def t_fine(self, value):
+        self._t_fine = value if value > 0 else 0
+
+    @property
     def temperature(self):
         " Return the temperature in degrees Celsius. "
         raw_temp = self.get_data('temperature')
