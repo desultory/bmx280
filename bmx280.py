@@ -129,10 +129,10 @@ class BMx280:
     def temperature(self):
         " Return the temperature in degrees Celsius. "
         raw_temp = self.get_data('temperature')
-        var1 = (((raw_temp >> 3) - (self.T1 << 1)) * self.T2) >> 11
-        var2 = (((((raw_temp >> 4) - self.T1) ** 2) >> 12) * self.T3) >> 14
+        var1 = (((raw_temp / 8) - (self.T1 * 2)) * self.T2) / 2048
+        var2 = (((((raw_temp / 16) - self.T1) ** 2) / 4096) * self.T3) / 16384
         self.t_fine = var1 + var2
-        return ((self.t_fine * 5 + 128) >> 8) / 100
+        return (self.t_fine * 5 + 128) / 25600
 
     @property
     def humidity(self):
