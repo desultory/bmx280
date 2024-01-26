@@ -85,7 +85,7 @@ class BMx280:
             offset += data_size
             num += 1
 
-    def read_register(self, register, length):
+    def read_register(self, register, length=1):
         return bytearray(self.i2c.readfrom_mem(self.i2c_address, register, length))
 
     def read_data(self):
@@ -192,17 +192,17 @@ class BMx280:
 
     @property
     def id(self):
-        return self.i2c.readfrom_mem(self.i2c_address, self.CONTROL_REGISTERS['id'], 1)[0]
+        return self.read_register(self.CONTROL_REGISTERS['id'])
 
     @property
     def status(self):
         # Bit 3 is measuring, bit 0 is im_update
-        status = self.i2c.readfrom_mem(self.i2c_address, self.CONTROL_REGISTERS['status'], 1)[0]
+        status = self.read_register(self.CONTROL_REGISTERS['status'])
         return 'measuring' if status & 0x08 else 'updating' if status & 0x01 else 'ready'
 
     @property
     def mode(self):
-        mode = self.i2c.readfrom_mem(self.i2c_address, self.CONTROL_REGISTERS['control'], 1)[0]
+        mode = self.read_register(self.CONTROL_REGISTERS['control'])
         if mode & 0:
             return 'sleep'
         elif mode & 11:
