@@ -55,7 +55,6 @@ class BMx280:
     def load_calibration_data(self):
         """ Load calibration data based on defined trims. Detect humidity sensor."""
         self.humidity_sensor = False
-        self.t_fine = 0
         for name, parameters in self.TRIMS.items():
             address, structure = parameters
             data = self.read_register(address, calcsize(structure))
@@ -80,6 +79,7 @@ class BMx280:
                 # Handle unwrapping the signed value
                 chunk[0] >>= 4
                 chunk[1] *= 16
+                chunk[0], chunk[1] = chunk[1], chunk[0]
 
             value = unpack(fmt, chunk)
             setattr(self, f"{field_name}{num}", value[0])
@@ -132,18 +132,14 @@ class BMx280:
         self.temperature  # Ensure the t_fine value is calculated
         return self._t_fine
 
-    @t_fine.setter
-    def t_fine(self, value):
-        self._t_fine = value if value > 0 else 0
-
     @property
     def temperature(self):
         " Return the temperature in degrees Celsius. "
         raw_temp = self.get_data('temperature')
         var1 = (((raw_temp / 8) - (self.T1 * 2)) * self.T2) / 2048
         var2 = (((((raw_temp / 16) - self.T1) ** 2) / 4096) * self.T3) / 16384
-        self.t_fine = var1 + var2
-        return (self.t_fine * 5 + 128) / 25600
+        self._t_fine = var1 + var2
+        return (self._t_fine * 5 + 128) / 25600
 
     @property
     def humidity(self):
@@ -203,17 +199,17 @@ class BMx280:
 
     @property
     def id(self):
-        return self.read_register(self.CONTROL_REGISTERS['id'])
+        return self.read_register(self.CONTROL_REGISTERS['id'])[0]
 
     @property
     def status(self):
         # Bit 3 is measuring, bit 0 is im_update
-        status = self.read_register(self.CONTROL_REGISTERS['status'])
+        status = self.read_register(self.CONTROL_REGISTERS['status'])[0]
         return 'measuring' if status & 0x08 else 'updating' if status & 0x01 else 'ready'
 
     @property
     def mode(self):
-        mode = self.read_register(self.CONTROL_REGISTERS['control'])
+        mode = self.read_register(self.CONTROL_REGISTERS['control'])[0]
         if mode & 0:
             return 'sleep'
         elif mode & 11:
