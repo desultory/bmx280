@@ -128,6 +128,14 @@ class BMx280:
         return value
 
     @property
+    def name(self):
+        from re import compile, search
+        rstr = compile(r'I2C\((\d), freq=(\d+), scl=(\d+), sda=(\d+).*\)')
+        controller, freq, scl, sda = search(rstr, str(self.i2c)).groups()
+        name = 'BME280' if self.humidity_sensor else 'BMP280'
+        return f"{name}-{controller}:{self.i2c_address};{scl},{sda}"
+
+    @property
     def t_fine(self):
         self.temperature  # Ensure the t_fine value is calculated
         return self._t_fine
