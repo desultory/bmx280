@@ -72,17 +72,14 @@ class BMx280:
             chunk = data[offset:offset + data_size]
             if field_name == 'H' and num == 4:
                 # Mask off the unused bits, adjust the offset for the next read
-                chunk[0] *= 16
-                chunk[1] &= 0x0F
                 offset -= 1
+                self.H4 = (chunk[0] * 16) | (chunk[1] & 0x0F)
             elif field_name == 'H' and num == 5:
                 # Handle unwrapping the signed value
-                chunk[0] >>= 4
-                chunk[1] *= 16
-                chunk[0], chunk[1] = chunk[1], chunk[0]
-
-            value = unpack(fmt, chunk)
-            setattr(self, f"{field_name}{num}", value[0])
+                self.H5 = (chunk[1] * 16) | (chunk[0] >> 4)
+            else:
+                value = unpack(fmt, chunk)
+                setattr(self, f"{field_name}{num}", value[0])
 
             offset += data_size
             num += 1
