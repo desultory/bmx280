@@ -17,6 +17,8 @@ controller = SensorController(i2c_controllers, ignore_missing=True)
 
 > `ignore_missing` will ignore empty busses and missing devices
 
+> `interval` defines the amount of time a request should take, acting as a mininum request time.
+
 Once created, all attached sensor's stats can be printed with:
 
 ```
