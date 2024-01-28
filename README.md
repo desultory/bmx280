@@ -54,6 +54,16 @@ Making a breakout board to attach sensors can help keep wiring neater, and reduc
 
 > A simple bus extender can be made by attaching board connectors to the same row on stripboard. Keyed connectors can be beneficial to ensure devices aren't connected backwards.
 
+### Address change
+
+Every device on an I2C bus must has a unique address to be accessed, all of these sensors have the same address, but this can be increaased by 1 with some soldering.
+
+#### BMP280
+
+On a BMP280, connecting SDO to VCC will change the address:
+
+![BMP280 Address Change](pictures/bmp_alt_address.jpeg)
+
 ### Tips
 
 #### Stripboard
