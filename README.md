@@ -60,3 +60,6 @@ Making a breakout board to attach sensors can help keep wiring neater, and reduc
 
 When using stripboard, it can be scored over the holes and snapped to shape.
 
+#### Insulation
+
+Tape can be added to the back of a board to protect traces from shorting.
