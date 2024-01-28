@@ -2,7 +2,6 @@
 
 A Micropython library for BME280 and BMX280 sensors.
 
-
 ## Usage
 
 `SensorController` can be used to connect to multiple sensors.
@@ -10,7 +9,6 @@ A Micropython library for BME280 and BMX280 sensors.
 An instance can be created using a dict of bus numbers and pins:
 
 ```
-
 i2c_controllers = {0: {'pins': (0, 1)},
                    1: {'pins': (26, 27)}}
 
@@ -31,4 +29,6 @@ Each sensor will have a key in the format:
 
 `<SENSOR_NAME>-<CONTROLLER>:<ADDRESS>;<SCL>,<SCA>`
 
+### Hardware
 
+![overview](pictures/overview.jpeg)
