@@ -43,7 +43,7 @@ Each sensor will have a key in the format:
 * [2.54mm Crimp Terminal](https://www.taydaelectronics.com/crimp-terminal-connector-xh-2-54mm.html)
 * [4 pin 2.54mm Housing](https://www.taydaelectronics.com/connectors-sockets/wafer-housing-crimp-terminal/housing-connector-2-54mm-4-pins.html)
 * [2 pin 2.54mm Housing](https://www.taydaelectronics.com/connectors-sockets/wafer-housing-crimp-terminal/housing-connector-2-54mm-2-pins.html)
-* [4 pin board connector](https://www.taydaelectronics.com/connectors-sockets/wafer-housing-crimp-terminal/wafer-connector-2-54mm-2-pins-right-angle.html)
+* [4 pin board connector](https://www.taydaelectronics.com/connectors-sockets/wafer-housing-crimp-terminal/wafer-connector-2-54mm-4-pins-right-angle.html)
 * [2 pin board connector](https://www.taydaelectronics.com/connectors-sockets/wafer-housing-crimp-terminal/wafer-connector-2-54mm-2-pins-right-angle.html)
 
 ### Breakout board
