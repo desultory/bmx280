@@ -3,7 +3,8 @@ from bmx280 import BMx280
 
 I2C_FREQ = 400_000
 
-SENSORS = {118: BMx280}
+SENSORS = {118: BMx280,
+           119: BMx280}
 
 
 class SensorController:
@@ -27,7 +28,8 @@ class SensorController:
     def add_devices(self, controller, devices):
         for device in devices:
             if device in SENSORS:
-                self.sensors.append(SENSORS[device](controller))
+                sensor = SENSORS[device](i2c=controller, i2c_address=device)
+                self.sensors.append(sensor)
             elif not self.ignore_missing:
                 raise OSError("Unknown device: %s" % device)
 
