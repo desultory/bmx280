@@ -97,6 +97,7 @@ class BMx280:
             retries += 1
             if retries > self.RETRY_COUNT:
                 raise RuntimeError('Timed out waiting for sensor to become ready')
+        self.mode = 'sleep'
 
     def get_data(self, data_type):
         if data_type not in self.DATA_REGISTERS:
@@ -215,7 +216,7 @@ class BMx280:
     @property
     def mode(self):
         mode = self.read_register(self.CONTROL_REGISTERS['control'])[0]
-        if mode & 0:
+        if mode & 1 == 0:
             return 'sleep'
         elif mode & 11:
             return 'normal'

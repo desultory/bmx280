@@ -8,9 +8,10 @@ SENSORS = {118: BMx280,
 
 
 class SensorController:
-    def __init__(self, i2c_controllers, ignore_missing=False):
+    def __init__(self, i2c_controllers, ignore_missing=False, interval=500):
         self.i2c_controllers = i2c_controllers
         self.ignore_missing = ignore_missing
+        self.interval = interval
         self.scan_devices()
 
     def scan_devices(self):
@@ -32,6 +33,18 @@ class SensorController:
                 self.sensors.append(sensor)
             elif not self.ignore_missing:
                 raise OSError("Unknown device: %s" % device)
+
+    def to_json(self):
+        from utime import ticks_ms, sleep_ms
+
+        current_time = ticks_ms()
+        out_str = self.__str__()
+        finish_time = ticks_ms()
+
+        if finish_time - current_time < self.interval:
+            sleep_ms(self.interval - (finish_time - current_time))
+
+        return out_str
 
     def __str__(self):
         from json import dumps, loads
