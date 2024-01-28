@@ -29,6 +29,34 @@ Each sensor will have a key in the format:
 
 `<SENSOR_NAME>-<CONTROLLER>:<ADDRESS>;<SCL>,<SCA>`
 
-### Hardware
+## Hardware
 
 ![overview](pictures/overview.jpeg)
+
+### Parts
+
+* [RPI Pico](https://www.raspberrypi.com/products/rp2040/)
+* [BME280](https://www.bosch-sensortec.com/products/environmental-sensors/humidity-sensors-bme280/)
+* [BMP280](https://www.bosch-sensortec.com/products/environmental-sensors/pressure-sensors/bmp280/)
+* [Crimping tool](https://www.taydaelectronics.com/sn-48b-crimping-tool-plier-0-5-1-5-mm-for-awg-26-16.html)
+* [Stripboard](https://www.taydaelectronics.com/small-stripboard-93x55mm-copper.html)
+* [2.54mm Crimp Terminal](https://www.taydaelectronics.com/crimp-terminal-connector-xh-2-54mm.html)
+* [4 pin 2.54mm Housing](https://www.taydaelectronics.com/connectors-sockets/wafer-housing-crimp-terminal/housing-connector-2-54mm-4-pins.html)
+* [2 pin 2.54mm Housing](https://www.taydaelectronics.com/connectors-sockets/wafer-housing-crimp-terminal/housing-connector-2-54mm-2-pins.html)
+* [4 pin board connector](https://www.taydaelectronics.com/connectors-sockets/wafer-housing-crimp-terminal/wafer-connector-2-54mm-2-pins-right-angle.html)
+* [2 pin board connector](https://www.taydaelectronics.com/connectors-sockets/wafer-housing-crimp-terminal/wafer-connector-2-54mm-2-pins-right-angle.html)
+
+### Breakout board
+
+![breakout](pictures/breakout_wiring.jpeg)
+
+Making a breakout board to attach sensors can help keep wiring neater, and reduce the amount of soldering directly onto the microcontroller.
+
+> A simple bus extender can be made by attaching board connectors to the same row on stripboard. Keyed connectors can be beneficial to ensure devices aren't connected backwards.
+
+### Tips
+
+#### Stripboard
+
+When using stripboard, it can be scored over the holes and snapped to shape.
+
