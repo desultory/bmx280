@@ -5,10 +5,23 @@ from utime import sleep_ms
 i2c_controllers = {0: {'pins': (0, 1)},
                    1: {'pins': (26, 27)}}
 
-s = SensorController(i2c_controllers)
+try:
+    s = SensorController(i2c_controllers)
+except Exception as e:
+    print(e)
+    reset()
+
+do_reset = False
+
 
 while True:
-    print(s)
+    try:
+        print(s)
+    except Exception as e:
+        if not isinstance(e, KeyboardInterrupt):
+            do_reset = True
+            break
     sleep_ms(250)
 
-reset()
+if do_reset:
+    reset()

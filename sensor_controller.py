@@ -20,11 +20,15 @@ class SensorController:
             devices = i2c.scan()
             if devices:
                 self.add_devices(i2c, devices)
+            else:
+                raise OSError("No I2C devices found on controller: %s" % controller)
 
     def add_devices(self, controller, devices):
         for device in devices:
             if device in SENSORS:
                 self.sensors.append(SENSORS[device](controller))
+            else:
+                raise OSError("Unknown device: %s" % device)
 
     def __str__(self):
         from json import dumps, loads
