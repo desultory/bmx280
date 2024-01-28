@@ -7,8 +7,9 @@ SENSORS = {118: BMx280}
 
 
 class SensorController:
-    def __init__(self, i2c_controllers):
+    def __init__(self, i2c_controllers, ignore_missing=False):
         self.i2c_controllers = i2c_controllers
+        self.ignore_missing = ignore_missing
         self.scan_devices()
 
     def scan_devices(self):
@@ -20,14 +21,14 @@ class SensorController:
             devices = i2c.scan()
             if devices:
                 self.add_devices(i2c, devices)
-            else:
+            elif not self.ignore_missing:
                 raise OSError("No I2C devices found on controller: %s" % controller)
 
     def add_devices(self, controller, devices):
         for device in devices:
             if device in SENSORS:
                 self.sensors.append(SENSORS[device](controller))
-            else:
+            elif not self.ignore_missing:
                 raise OSError("Unknown device: %s" % device)
 
     def __str__(self):

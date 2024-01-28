@@ -6,9 +6,10 @@ i2c_controllers = {0: {'pins': (0, 1)},
                    1: {'pins': (26, 27)}}
 
 try:
-    s = SensorController(i2c_controllers)
+    s = SensorController(i2c_controllers, ignore_missing=True)
 except Exception as e:
     print(e)
+    sleep_ms(1000)
     reset()
 
 do_reset = False
