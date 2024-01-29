@@ -1,6 +1,6 @@
 # BMx280
 
-A Micropython library for BME280 and BMX280 sensors.
+A Micropython library for BME280 and BMP280 sensors.
 
 ## Usage
 
