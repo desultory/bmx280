@@ -34,21 +34,21 @@ class SensorController:
             elif not self.ignore_missing:
                 raise OSError("Unknown device: %s" % device)
 
-    def to_json(self):
+    async def to_json(self):
         from utime import ticks_ms, sleep_ms
+        from json import dumps, loads
 
         current_time = ticks_ms()
-        out_str = self.__str__()
+        out_data = {}
+        for sensor in self.sensors:
+            out_data.update({await sensor.name: loads(str(sensor))})
         finish_time = ticks_ms()
 
         if finish_time - current_time < self.interval:
             sleep_ms(self.interval - (finish_time - current_time))
 
-        return out_str
+        return dumps(out_data)
 
     def __str__(self):
-        from json import dumps, loads
-        out_data = {}
-        for sensor in self.sensors:
-            out_data.update({sensor.name: loads(str(sensor))})
-        return dumps(out_data)
+        from asyncio import run
+        return run(self.to_json())

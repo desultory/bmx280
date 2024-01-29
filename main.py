@@ -19,13 +19,12 @@ except Exception as e:
 
 do_reset = False
 
-freq(40_000_000)
-
+freq(50_000_000)
 
 while True:
     try:
         led.toggle()
-        print(s.to_json())
+        print(s)
     except Exception as e:
         if not isinstance(e, KeyboardInterrupt):
             do_reset = True

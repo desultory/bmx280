@@ -27,7 +27,7 @@ class BMx280:
     RETRY_COUNT = 100
 
     def __init__(self, i2c, i2c_address=BMx_I2C_ADDRESS, cache_ms=225,
-                 init_mode='sleep', t_oversample=5, p_oversample=5, h_oversample=5):
+                 init_mode='normal', t_oversample=5, p_oversample=5, h_oversample=5):
         """
         i2c: I2C object
         i2c_address: I2C address of the sensor
@@ -43,27 +43,32 @@ class BMx280:
         self.p_oversample = p_oversample
         self.h_oversample = h_oversample
         self.load_calibration_data()
-        self.mode = init_mode
+        self.set_mode(init_mode)
+
+    async def to_json(self):
+        from json import dumps
+        data = {'temperature': await self.temperature, 'pressure': await self.pressure}
+        if self.humidity_sensor:
+            data['humidity'] = await self.humidity
+        return dumps(data)
 
     def __str__(self):
-        from json import dumps
-        data = {'temperature': self.temperature, 'pressure': self.pressure}
-        if self.humidity_sensor:
-            data['humidity'] = self.humidity
-        return dumps(data)
+        from asyncio import run
+        return run(self.to_json())
 
     def load_calibration_data(self):
         """ Load calibration data based on defined trims. Detect humidity sensor."""
         self.humidity_sensor = False
         for name, parameters in self.TRIMS.items():
             address, structure = parameters
-            data = self.read_register(address, calcsize(structure))
+            data = self._read_register(address, calcsize(structure))
             self.process_calibration_data(data, structure, name)
 
+        # If the humidity register is non-zero, we have a humidity sensor, so process the trims
         if getattr(self, 'H1', 0) != 0:
             self.humidity_sensor = True
             address, structure = self.HUMIDITY_TRIMS
-            data = self.read_register(address, calcsize(structure))
+            data = self._read_register(address, calcsize(structure))
             self.process_calibration_data(data, structure, 'H', num=2)
 
     def process_calibration_data(self, data, structure, field_name, num=1, offset=0):
@@ -84,31 +89,32 @@ class BMx280:
             offset += data_size
             num += 1
 
-    def read_register(self, register, length=1):
+    def _read_register(self, register, length=1):
         return bytearray(self.i2c.readfrom_mem(self.i2c_address, register, length))
+
+    async def read_register(self, register, length=1):
+        return self._read_register(register, length)
 
     def read_data(self):
         """ Read the temperature, pressure, and humidity data from the sensor. """
-        # Force a single sensor reading
-        self.mode = 'forced'
         retries = 0
-        while self.status != 'ready':
+        while await self.status != 'ready':
             sleep_ms(self.SLEEP_MS)
             retries += 1
             if retries > self.RETRY_COUNT:
                 raise RuntimeError('Timed out waiting for sensor to become ready')
-        self.mode = 'sleep'
 
-    def get_data(self, data_type):
+    async def get_data(self, data_type):
         if data_type not in self.DATA_REGISTERS:
             raise ValueError('Invalid data type: %s' % data_type)
 
+        # Returns cached data if it's fresh
         if getattr(self, f"_raw_{data_type}", None) and ticks_ms() - getattr(self, f"_time_{data_type}") < self.cache_life:
             return getattr(self, f"_raw_{data_type}")
 
         self.read_data()
         register, length = self.DATA_REGISTERS[data_type]
-        data = self.read_register(register, ceil(length / 8))
+        data = await self.read_register(register, ceil(length / 8))
 
         # Get the value from the most/least significant bits
         value = (data[0] << 8) + data[1]
@@ -121,12 +127,13 @@ class BMx280:
             # Shift off unused bits
             value = value >> (len(data) * 8 - length)
 
+        # Write raw data to cache, and set the timestamp
         setattr(self, f"_raw_{data_type}", value)
         setattr(self, f"_time_{data_type}", ticks_ms())
         return value
 
     @property
-    def name(self):
+    async def name(self):
         from re import compile, search
         rstr = compile(r'I2C\((\d), freq=(\d+), scl=(\d+), sda=(\d+).*\)')
         controller, freq, scl, sda = search(rstr, str(self.i2c)).groups()
@@ -134,25 +141,25 @@ class BMx280:
         return f"{name}-{controller}:{self.i2c_address};{scl},{sda}"
 
     @property
-    def t_fine(self):
+    async def t_fine(self):
         self.temperature  # Ensure the t_fine value is calculated
         return self._t_fine
 
     @property
-    def temperature(self):
+    async def temperature(self):
         " Return the temperature in degrees Celsius. "
-        raw_temp = self.get_data('temperature')
+        raw_temp = await self.get_data('temperature')
         var1 = (((raw_temp / 8) - (self.T1 * 2)) * self.T2) / 2048
         var2 = (((((raw_temp / 16) - self.T1) ** 2) / 4096) * self.T3) / 16384
         self._t_fine = var1 + var2
         return (self._t_fine * 5 + 128) / 25600
 
     @property
-    def humidity(self):
+    async def humidity(self):
         " Return the relative humidity in percent. "
-        raw_humidity = self.get_data('humidity')
+        raw_humidity = await self.get_data('humidity')
 
-        var1 = self.t_fine - 76800
+        var1 = await self.t_fine - 76800
         var2 = raw_humidity * 16384
         var3 = self.H4 * 1048576
         var4 = self.H5 * var1
@@ -168,11 +175,11 @@ class BMx280:
         return var5 / (2 ** 22)
 
     @property
-    def pressure(self):
+    async def pressure(self):
         " Return the pressure in hPa. "
-        raw_pressure = self.get_data('pressure')
+        raw_pressure = await self.get_data('pressure')
 
-        var1 = (self.t_fine / 2) - 64000
+        var1 = (await self.t_fine / 2) - 64000
         var2 = (((var1 / 4) ** 2) / 2048) * self.P6
         var2 += (var1 * self.P5) * 2
         var2 = (var2 / 4) + (self.P4 * 65536)
@@ -204,18 +211,18 @@ class BMx280:
         return pressure
 
     @property
-    def id(self):
-        return self.read_register(self.CONTROL_REGISTERS['id'])[0]
+    async def id(self):
+        return await self.read_register(self.CONTROL_REGISTERS['id'])[0]
 
     @property
-    def status(self):
+    async def status(self):
         # Bit 3 is measuring, bit 0 is im_update
-        status = self.read_register(self.CONTROL_REGISTERS['status'])[0]
+        status = await self.read_register(self.CONTROL_REGISTERS['status'])[0]
         return 'measuring' if status & 0x08 else 'updating' if status & 0x01 else 'ready'
 
     @property
-    def mode(self):
-        mode = self.read_register(self.CONTROL_REGISTERS['control'])[0]
+    async def mode(self):
+        mode = await self.read_register(self.CONTROL_REGISTERS['control'])[0]
         if mode & 1 == 0:
             return 'sleep'
         elif mode & 11:
@@ -223,8 +230,7 @@ class BMx280:
         else:
             return 'forced'
 
-    @mode.setter
-    def mode(self, value):
+    def set_mode(self, value):
         if value not in self.MODES:
             raise ValueError('Invalid mode: %s' % value)
         if self.humidity_sensor:
