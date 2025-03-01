@@ -142,7 +142,7 @@ class BMx280:
 
     @property
     async def t_fine(self):
-        self.temperature  # Ensure the t_fine value is calculated
+        await self.temperature  # Ensure the t_fine value is calculated
         return self._t_fine
 
     @property
