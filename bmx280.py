@@ -2,7 +2,7 @@ from machine import I2C
 from ustruct import calcsize, unpack
 from time import sleep_ms
 from math import ceil
-from utime import ticks_ms
+from utime import ticks_ms, ticks_diff
 
 
 # Address for the BME280/BMP280
@@ -109,7 +109,8 @@ class BMx280:
             raise ValueError('Invalid data type: %s' % data_type)
 
         # Returns cached data if it's fresh
-        if getattr(self, f"_raw_{data_type}", None) and ticks_ms() - getattr(self, f"_time_{data_type}") < self.cache_life:
+        elapsed_time = ticks_diff(ticks_ms(), getattr(self, f"_time_{data_type}", 0))
+        if getattr(self, f"_raw_{data_type}", None) and (elapsed_time < 0 or elapsed_time < self.cache_life):
             return getattr(self, f"_raw_{data_type}")
 
         self.read_data()
