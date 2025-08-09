@@ -41,12 +41,3 @@ On a BMP280, connecting SDO to VCC will change the address:
 
 ![BMP280 Address Change](pictures/bmp_alt_address.jpeg)
 
-### Tips
-
-#### Stripboard
-
-When using stripboard, it can be scored over the holes and snapped to shape.
-
-#### Insulation
-
-Tape can be added to the back of a board to protect traces from shorting.
